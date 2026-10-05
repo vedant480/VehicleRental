@@ -1,0 +1,21 @@
+# Eclipse
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+
+# Java
+*.class
+
+# Build files
+target/
+
+# Tomcat
+work/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
