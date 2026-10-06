@@ -150,4 +150,85 @@ public class VehicleDAO {
             return false;
         }
     }
+    public List<Vehicle> searchAvailableVehicles(
+            String vehicleType,
+            Double maxPrice) {
+
+        List<Vehicle> vehicles = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM vehicles WHERE status = 'AVAILABLE'"
+        );
+
+        List<Object> parameters = new ArrayList<>();
+
+        if (vehicleType != null
+                && !vehicleType.trim().isEmpty()) {
+
+            sql.append(" AND vehicle_type = ?");
+            parameters.add(vehicleType);
+        }
+
+        if (maxPrice != null) {
+
+            sql.append(" AND price_per_day <= ?");
+            parameters.add(maxPrice);
+        }
+
+        sql.append(" ORDER BY price_per_day ASC");
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps =
+                    con.prepareStatement(sql.toString())
+        ) {
+
+            for (int i = 0; i < parameters.size(); i++) {
+
+                Object parameter = parameters.get(i);
+
+                if (parameter instanceof String) {
+                    ps.setString(i + 1, (String) parameter);
+                } else if (parameter instanceof Double) {
+                    ps.setDouble(i + 1, (Double) parameter);
+                }
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Vehicle vehicle = new Vehicle();
+
+                vehicle.setVehicleId(
+                        rs.getInt("vehicle_id"));
+
+                vehicle.setVehicleNumber(
+                        rs.getString("vehicle_number"));
+
+                vehicle.setBrand(
+                        rs.getString("brand"));
+
+                vehicle.setModel(
+                        rs.getString("model"));
+
+                vehicle.setVehicleType(
+                        rs.getString("vehicle_type"));
+
+                vehicle.setPricePerDay(
+                        rs.getDouble("price_per_day"));
+
+                vehicle.setStatus(
+                        rs.getString("status"));
+
+                vehicles.add(vehicle);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return vehicles;
+    }
 }

@@ -2,6 +2,7 @@ package com.vehicle.rental;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.time.temporal.ChronoUnit;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,33 +27,86 @@ public class RentVehicleServlet extends HttpServlet {
             return;
         }
 
-        int vehicleId = Integer.parseInt(
-                request.getParameter("vehicleId"));
+        try {
 
-        Date startDate = Date.valueOf(
-                request.getParameter("startDate"));
+            int vehicleId = Integer.parseInt(
+                    request.getParameter("vehicleId"));
 
-        Date endDate = Date.valueOf(
-                request.getParameter("endDate"));
+            Date startDate = Date.valueOf(
+                    request.getParameter("startDate"));
 
-        double totalAmount = Double.parseDouble(
-                request.getParameter("totalAmount"));
+            Date endDate = Date.valueOf(
+                    request.getParameter("endDate"));
 
-        Rental rental = new Rental();
+            // Calculate number of rental days
+            long days = ChronoUnit.DAYS.between(
+                    startDate.toLocalDate(),
+                    endDate.toLocalDate());
 
-        rental.setUserId(user.getUserId());
-        rental.setVehicleId(vehicleId);
-        rental.setStartDate(startDate);
-        rental.setEndDate(endDate);
-        rental.setTotalAmount(totalAmount);
-        rental.setStatus("ACTIVE");
+            // At least 1 day
+            if (days <= 0) {
+                days = 1;
+            }
 
-        RentalDAO dao = new RentalDAO();
+            // Get vehicle details
+            VehicleDAO vehicleDAO = new VehicleDAO();
 
-        if (dao.rentVehicle(rental)) {
-            response.sendRedirect("my-rentals");
-        } else {
-            response.sendRedirect("vehicles?error=Rental failed");
+            Vehicle selectedVehicle = null;
+
+            for (Vehicle v : vehicleDAO.getAllVehicles()) {
+
+                if (v.getVehicleId() == vehicleId) {
+                    selectedVehicle = v;
+                    break;
+                }
+            }
+
+            if (selectedVehicle == null) {
+                response.sendRedirect(
+                        "vehicles?error=Vehicle not found");
+                return;
+            }
+
+            // Check vehicle availability
+            if (!"AVAILABLE".equalsIgnoreCase(
+                    selectedVehicle.getStatus())) {
+
+                response.sendRedirect(
+                        "vehicles?error=Vehicle is not available");
+                return;
+            }
+
+            // Calculate total amount
+            double totalAmount =
+                    days * selectedVehicle.getPricePerDay();
+
+            Rental rental = new Rental();
+
+            rental.setUserId(user.getUserId());
+            rental.setVehicleId(vehicleId);
+            rental.setStartDate(startDate);
+            rental.setEndDate(endDate);
+            rental.setTotalAmount(totalAmount);
+            rental.setStatus("ACTIVE");
+
+            RentalDAO dao = new RentalDAO();
+
+            if (dao.rentVehicle(rental)) {
+
+                response.sendRedirect("my-rentals");
+
+            } else {
+
+                response.sendRedirect(
+                        "vehicles?error=Rental failed");
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            response.sendRedirect(
+                    "vehicles?error=Invalid rental details");
         }
     }
 }

@@ -1,182 +1,330 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.vehicle.rental.Rental" %>
 
+<%
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+
+    List<Rental> rentals =
+            (List<Rental>) request.getAttribute("rentals");
+
+    String message =
+            request.getParameter("message");
+
+    String error =
+            request.getParameter("error");
+%>
+
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>My Rentals</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-        }
+<meta charset="UTF-8">
 
-        .navbar {
-            background-color: #222;
-            padding: 15px;
-        }
+<title>My Rentals</title>
 
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-right: 20px;
-        }
+<style>
 
-        .container {
-            width: 90%;
-            margin: 30px auto;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
 
-        h2 {
-            text-align: center;
-        }
+.header {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
+.message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
 
-        th {
-            background-color: #007bff;
-            color: white;
-        }
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
 
-        .return-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
+.table-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
 
-        .completed {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #b02a37;
+}
+
+.pending {
+    color: #856404;
+    background-color: #fff3cd;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.active {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.completed {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.back {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back:hover {
+    background-color: #0056b3;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div class="navbar">
+<div class="header">
 
-    <a href="vehicles">Vehicles</a>
-    <a href="my-rentals">My Rentals</a>
-    <a href="logout">Logout</a>
+    <h1>My Rental History</h1>
 
 </div>
 
 <div class="container">
 
-    <h2>My Rental History</h2>
+<%
+    if (message != null) {
+%>
 
-    <%
-        String error = request.getParameter("error");
+    <div class="message">
+        <%= message %>
+    </div>
 
-        if (error != null) {
-    %>
+<%
+    }
 
-        <p style="color:red; text-align:center;">
-            <%= error %>
-        </p>
+    if (error != null) {
+%>
 
-    <%
+    <div class="error">
+        <%= error %>
+    </div>
+
+<%
+    }
+%>
+
+<div class="table-container">
+
+<%
+    if (rentals == null || rentals.isEmpty()) {
+%>
+
+    <p>No rental history found.</p>
+
+<%
+    } else {
+%>
+
+<table>
+
+<tr>
+
+    <th>Rental ID</th>
+    <th>Vehicle</th>
+    <th>Vehicle Number</th>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th>Total Amount</th>
+    <th>Status</th>
+    <th>Action</th>
+
+</tr>
+
+<%
+    for (Rental rental : rentals) {
+%>
+
+<tr>
+
+    <td>
+        <%= rental.getRentalId() %>
+    </td>
+
+    <td>
+        <%= rental.getVehicleBrand() %>
+        <%= rental.getVehicleModel() %>
+    </td>
+
+    <td>
+        <%= rental.getVehicleNumber() %>
+    </td>
+
+    <td>
+        <%= rental.getStartDate() %>
+    </td>
+
+    <td>
+        <%= rental.getEndDate() %>
+    </td>
+
+    <td>
+        Rs. <%= rental.getTotalAmount() %>
+    </td>
+
+    <td>
+
+<%
+        if ("ACTIVE".equalsIgnoreCase(
+                rental.getStatus())) {
+%>
+
+        <span class="active">
+            ACTIVE
+        </span>
+
+<%
+        } else if ("RETURN_REQUESTED".equalsIgnoreCase(
+                rental.getStatus())) {
+%>
+
+        <span class="pending">
+            RETURN REQUESTED
+        </span>
+
+<%
+        } else {
+%>
+
+        <span class="completed">
+            COMPLETED
+        </span>
+
+<%
         }
+%>
 
-        List<Rental> rentals =
-                (List<Rental>) request.getAttribute("rentals");
-    %>
+    </td>
 
-    <table>
+    <td>
 
-        <tr>
-            <th>Rental ID</th>
-            <th>Vehicle ID</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
+<%
+        if ("ACTIVE".equalsIgnoreCase(
+                rental.getStatus())) {
+%>
 
-        <%
-            if (rentals != null) {
+        <form action="return"
+              method="post"
+              onsubmit="return confirm('Are you sure you want to request vehicle return?');">
 
-                for (Rental rental : rentals) {
-        %>
+            <input type="hidden"
+                   name="rentalId"
+                   value="<%= rental.getRentalId() %>">
 
-        <tr>
+            <button type="submit">
+                Request Return
+            </button>
 
-            <td><%= rental.getRentalId() %></td>
+        </form>
 
-            <td><%= rental.getVehicleId() %></td>
+<%
+        } else if ("RETURN_REQUESTED".equalsIgnoreCase(
+                rental.getStatus())) {
+%>
 
-            <td><%= rental.getStartDate() %></td>
+        Waiting for admin verification.
 
-            <td><%= rental.getEndDate() %></td>
+<%
+        } else {
+%>
 
-            <td>₹ <%= rental.getTotalAmount() %></td>
+        Returned
 
-            <td><%= rental.getStatus() %></td>
+<%
+        }
+%>
 
-            <td>
+    </td>
 
-                <%
-                    if ("ACTIVE".equals(rental.getStatus())) {
-                %>
+</tr>
 
-                <form action="return" method="post">
+<%
+    }
+%>
 
-                    <input type="hidden"
-                           name="rentalId"
-                           value="<%= rental.getRentalId() %>">
+</table>
 
-                    <input type="hidden"
-                           name="vehicleId"
-                           value="<%= rental.getVehicleId() %>">
+<%
+    }
+%>
 
-                    <button class="return-btn"
-                            type="submit">
-                        Return
-                    </button>
+</div>
 
-                </form>
-
-                <%
-                    } else {
-                %>
-
-                    <span class="completed">
-                        Completed
-                    </span>
-
-                <%
-                    }
-                %>
-
-            </td>
-
-        </tr>
-
-        <%
-                }
-            }
-        %>
-
-    </table>
+<a href="vehicles" class="back">
+    Back to Vehicles
+</a>
 
 </div>
 
 </body>
+
 </html>

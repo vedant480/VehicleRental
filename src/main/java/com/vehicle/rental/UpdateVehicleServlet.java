@@ -25,7 +25,14 @@ public class UpdateVehicleServlet extends HttpServlet {
 
             return;
         }
+        User user =
+                (User) session.getAttribute("user");
 
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+
+            response.sendRedirect("vehicles");
+            return;
+        }
 
         try {
 

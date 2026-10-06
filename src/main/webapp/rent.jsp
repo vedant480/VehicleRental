@@ -62,10 +62,6 @@
                name="vehicleId"
                value="<%= vehicleId %>">
 
-        <input type="hidden"
-               name="totalAmount"
-               value="0">
-
         <label>Start Date</label>
 
         <input type="date"
@@ -80,7 +76,7 @@
 
         <p>
             Price per day:
-            <strong>₹ <%= price %></strong>
+            <strong>Rs. <%= price %></strong>
         </p>
 
         <button type="submit">

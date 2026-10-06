@@ -22,6 +22,14 @@ public class AddVehicleServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
             return;
         }
+        User user =
+                (User) session.getAttribute("user");
+
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+
+            response.sendRedirect("vehicles");
+            return;
+        }
 
         String vehicleNumber = request.getParameter("vehicleNumber");
         String brand = request.getParameter("brand");

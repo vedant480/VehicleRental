@@ -22,6 +22,14 @@ public class DeleteVehicleServlet extends HttpServlet {
             response.sendRedirect("login.jsp");
             return;
         }
+        User user =
+                (User) session.getAttribute("user");
+
+        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+
+            response.sendRedirect("vehicles");
+            return;
+        }
 
         int vehicleId =
                 Integer.parseInt(request.getParameter("vehicleId"));

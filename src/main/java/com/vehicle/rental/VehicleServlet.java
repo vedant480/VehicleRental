@@ -13,16 +13,56 @@ import jakarta.servlet.http.HttpServletResponse;
 public class VehicleServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+                          HttpServletResponse response)
             throws ServletException, IOException {
+
+        String vehicleType =
+                request.getParameter("vehicleType");
+
+        String maxPriceParameter =
+                request.getParameter("maxPrice");
+
+        Double maxPrice = null;
+
+        try {
+
+            if (maxPriceParameter != null
+                    && !maxPriceParameter.trim().isEmpty()) {
+
+                maxPrice =
+                        Double.parseDouble(maxPriceParameter);
+            }
+
+        } catch (NumberFormatException e) {
+
+            request.setAttribute(
+                    "error",
+                    "Please enter a valid maximum price.");
+
+            maxPrice = null;
+        }
 
         VehicleDAO dao = new VehicleDAO();
 
-        List<Vehicle> vehicles = dao.getAllVehicles();
+        List<Vehicle> vehicles =
+                dao.searchAvailableVehicles(
+                        vehicleType,
+                        maxPrice);
 
-        request.setAttribute("vehicles", vehicles);
+        request.setAttribute(
+                "vehicles",
+                vehicles);
 
-        request.getRequestDispatcher("vehicles.jsp")
-               .forward(request, response);
+        request.setAttribute(
+                "selectedType",
+                vehicleType);
+
+        request.setAttribute(
+                "selectedMaxPrice",
+                maxPriceParameter);
+
+        request.getRequestDispatcher(
+                "vehicles.jsp")
+                .forward(request, response);
     }
 }

@@ -103,6 +103,9 @@
                 Manage Vehicles
             </a>
 
+			<a href="admin-rentals">
+    			Manage Rentals / Returns
+			</a>
 
             <!-- Logout -->
 

@@ -175,7 +175,7 @@
 <div class="container">
 
     <a href="admin-dashboard.jsp" class="back-btn">
-        ← Back to Dashboard
+        Back to Dashboard
     </a>
 
     <% if (error != null) { %>
@@ -317,7 +317,7 @@
                         </td>
 
                         <td>
-                            ₹<%= vehicle.getPricePerDay() %>
+                            Rs.<%= vehicle.getPricePerDay() %>
                         </td>
 
                         <td>

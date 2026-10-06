@@ -16,27 +16,50 @@ public class ReturnVehicleServlet extends HttpServlet {
                           HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
+        HttpSession session =
+                request.getSession(false);
 
-        User user = (User) session.getAttribute("user");
+        if (session == null
+                || session.getAttribute("user") == null) {
 
-        if (user == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        int rentalId = Integer.parseInt(
-                request.getParameter("rentalId"));
+        User user =
+                (User) session.getAttribute("user");
 
-        int vehicleId = Integer.parseInt(
-                request.getParameter("vehicleId"));
+        try {
 
-        RentalDAO dao = new RentalDAO();
+            int rentalId =
+                    Integer.parseInt(
+                            request.getParameter("rentalId"));
 
-        if (dao.returnVehicle(rentalId, vehicleId)) {
-            response.sendRedirect("my-rentals");
-        } else {
-            response.sendRedirect("my-rentals?error=Return failed");
+            RentalDAO dao =
+                    new RentalDAO();
+
+            boolean requested =
+                    dao.requestReturn(
+                            rentalId,
+                            user.getUserId());
+
+            if (requested) {
+
+                response.sendRedirect(
+                        "my-rentals?message=Return request sent to admin");
+
+            } else {
+
+                response.sendRedirect(
+                        "my-rentals?error=Return request failed");
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            response.sendRedirect(
+                    "my-rentals?error=Invalid rental");
         }
     }
 }
